@@ -170,24 +170,22 @@ public class PushNotification implements IPushNotification {
         notificationManager.notify(id, notification);
     }
 
-    public void postNotificationSchedule(Notification notification,  Integer notificationId) {
+    public int postNotificationSchedule(Notification notification,  Integer notificationId) {
 
-        
         long fireDate = mNotificationProps.getFireDate();
         long interval = mNotificationProps.getRepeatInterval();
         
         if (fireDate == 0) {
             Log.e("ReactNativeNotifications", "No date specified for the scheduled notification");
-            return;
+            return notificationId;
         }
         
-        Context context = getReactApplicationContext();
         Intent notificationIntent = new Intent(context, NotificationScheduler.class);
         notificationIntent.putExtra(NotificationScheduler.NOTIFICATION_ID, notificationId);
         notificationIntent.putExtra(NotificationScheduler.NOTIFICATION, notification);
         
         PendingIntent pendingIntent = PendingIntent.getBroadcast(
-            context, 
+            mContext, 
             notificationId, 
             notificationIntent, 
             PendingIntent.FLAG_CANCEL_CURRENT
@@ -208,6 +206,8 @@ public class PushNotification implements IPushNotification {
                 pendingIntent
             );
         }
+
+        return notificationId;
     }
 
 
