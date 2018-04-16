@@ -30,7 +30,7 @@ public class PushNotificationProps {
 
     private static long buildRepeatTimeMilis(long interval) {
         if (interval < 10000l) {
-            Log.e(LOG_TAG, "react-native-notifications: notifications interval lowest value í 10s, your interval option will be set to 10s");
+            Log.e("ReactNativeNotifications", "react-native-notifications: notifications interval lowest value í 10s, your interval option will be set to 10s");
             return 10000l;
         }
         return interval;
@@ -54,10 +54,10 @@ public class PushNotificationProps {
             try {
                 return buildRepeatTimeMilis(Long.parseLong(interval));
             } catch (NumberFormatException e) {
-                Log.e(LOG_TAG, "react-native-notifications: parse interval error");
+                Log.e("ReactNativeNotifications", "react-native-notifications: parse interval error");
                 return -1;
             } catch (Exception e) {
-                Log.e(LOG_TAG, "react-native-notifications: undeclared interval for scheduler notifications");
+                Log.e("ReactNativeNotifications", "react-native-notifications: undeclared interval for scheduler notifications");
                 return -1;
             }
         }
@@ -76,7 +76,7 @@ public class PushNotificationProps {
             String fireDate =  mBundle.getString("fireDate");
             return Long.parseLong(fireDate);
         } catch (NumberFormatException e) {
-            Log.e(LOG_TAG, "react-native-notifications: parse fire date error");
+            Log.e("ReactNativeNotifications", "react-native-notifications: parse fire date error");
             return 0;
         }
     }

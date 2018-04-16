@@ -177,7 +177,7 @@ public class PushNotification implements IPushNotification {
         long interval = mNotificationProps.getRepeatInterval();
         
         if (fireDate == 0) {
-            Log.e(LOG_TAG, "react-native-notifications: No date specified for the scheduled notification");
+            Log.e("ReactNativeNotifications", "No date specified for the scheduled notification");
             return;
         }
         
