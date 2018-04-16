@@ -180,7 +180,7 @@ public class PushNotification implements IPushNotification {
             return notificationId;
         }
         
-        Intent notificationIntent = new Intent(context, NotificationScheduler.class);
+        Intent notificationIntent = new Intent(mContext, NotificationScheduler.class);
         notificationIntent.putExtra(NotificationScheduler.NOTIFICATION_ID, notificationId);
         notificationIntent.putExtra(NotificationScheduler.NOTIFICATION, notification);
         
@@ -191,7 +191,7 @@ public class PushNotification implements IPushNotification {
             PendingIntent.FLAG_CANCEL_CURRENT
             );
 
-        AlarmManager alarmManager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+        AlarmManager alarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
         if (interval != -1) {
             alarmManager.setRepeating(
                     AlarmManager.RTC_WAKEUP,
