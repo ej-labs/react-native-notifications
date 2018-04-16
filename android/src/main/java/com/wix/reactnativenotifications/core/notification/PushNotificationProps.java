@@ -73,16 +73,17 @@ public class PushNotificationProps {
 
     public long getFireDate() {
         try {
-            String fireDate =  mBundle.getString("fireDate");
-            return Long.parseLong(fireDate);
+            String fireDate =  mBundle.getDouble("fireDate");
+            return Double.valueOf(fireDate).longValue();
         } catch (NumberFormatException e) {
-            Log.e("ReactNativeNotifications", "react-native-notifications: parse fire date error");
-            return 0;
+            Log.e("ReactNativeNotifications", "parse fire date error");
+            return 0l;
         }
     }
 
     public long getRepeatInterval() {
         String interval =  mBundle.getString("repeatInterval");
+        Log.e("ReactNativeNotifications", "interval value: " + interval);
         return buildRepeatTimeMilis(interval);
     }
 
