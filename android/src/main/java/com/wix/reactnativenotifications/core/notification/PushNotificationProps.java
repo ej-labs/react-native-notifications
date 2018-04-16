@@ -73,7 +73,7 @@ public class PushNotificationProps {
 
     public long getFireDate() {
         try {
-            String fireDate =  mBundle.getDouble("fireDate");
+            double fireDate =  mBundle.getDouble("fireDate");
             return Double.valueOf(fireDate).longValue();
         } catch (NumberFormatException e) {
             Log.e("ReactNativeNotifications", "parse fire date error");
