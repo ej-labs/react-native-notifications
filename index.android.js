@@ -51,7 +51,11 @@ export class NotificationsAndroid {
 
   static localNotification(notification: Object) {
     const id = Math.random() * 100000000 | 0; // Bitwise-OR forces value onto a 32bit limit
-    RNNotifications.postLocalNotification(notification, id);
+    if (!notification.repeatInterval || notification.fireDate) {
+      RNNotifications.postLocalNotification(notification, id);
+    } else {
+      RNNotifications.postSchedulerLocalNotification(notification, id);
+    }
     return id;
   }
 

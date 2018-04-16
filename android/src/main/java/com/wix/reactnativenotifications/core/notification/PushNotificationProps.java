@@ -1,6 +1,7 @@
 package com.wix.reactnativenotifications.core.notification;
 
 import android.os.Bundle;
+import android.util.Log;
 
 public class PushNotificationProps {
 
@@ -10,14 +11,56 @@ public class PushNotificationProps {
         mBundle = new Bundle();
     }
 
-    public PushNotificationProps(String title, String body) {
+    public PushNotificationProps(
+            String title,
+            String body,
+            String fireDate,
+            String repeatInterval
+    ) {
         mBundle = new Bundle();
         mBundle.putString("title", title);
         mBundle.putString("body", body);
+        mBundle.putString("fireDate", fireDate);
+        mBundle.putString("repeatInterval", repeatInterval);
     }
 
     public PushNotificationProps(Bundle bundle) {
         mBundle = bundle;
+    }
+
+    private static long buildRepeatTimeMilis(long interval) {
+        if (interval < 10000l) {
+            Log.e(LOG_TAG, "react-native-notifications: notifications interval lowest value í 10s, your interval option will be set to 10s");
+            return 10000l;
+        }
+        return interval;
+    }
+
+    private static long buildRepeatTimeMilis(String interval) {
+        switch (interval) {
+            case "minute": 
+                return 60000l;
+
+            case "hour": 
+                return 3600000l;
+        
+            case "day":
+                return 86400000l;
+
+            case "week":
+                return 604800000l;
+
+            default:
+            try {
+                return buildRepeatTimeMilis(Long.parseLong(interval));
+            } catch (NumberFormatException e) {
+                Log.e(LOG_TAG, "react-native-notifications: parse interval error");
+                return -1;
+            } catch (Exception e) {
+                Log.e(LOG_TAG, "react-native-notifications: undeclared interval for scheduler notifications");
+                return -1;
+            }
+        }
     }
 
     public String getTitle() {
@@ -26,6 +69,21 @@ public class PushNotificationProps {
 
     public String getBody() {
         return mBundle.getString("body");
+    }
+
+    public long getFireDate() {
+        try {
+            String fireDate =  mBundle.getString("fireDate");
+            return Long.parseLong(fireDate);
+        } catch (NumberFormatException e) {
+            Log.e(LOG_TAG, "react-native-notifications: parse fire date error");
+            return 0;
+        }
+    }
+
+    public long getRepeatInterval() {
+        String interval =  mBundle.getString("repeatInterval");
+        return buildRepeatTimeMilis(interval);
     }
 
     public Bundle asBundle() {

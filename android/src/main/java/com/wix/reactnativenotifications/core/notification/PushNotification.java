@@ -1,11 +1,13 @@
 package com.wix.reactnativenotifications.core.notification;
 
+import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.facebook.react.bridge.ReactContext;
 import com.wix.reactnativenotifications.core.AppLaunchHelper;
@@ -15,6 +17,7 @@ import com.wix.reactnativenotifications.core.AppLifecycleFacadeHolder;
 import com.wix.reactnativenotifications.core.InitialNotificationHolder;
 import com.wix.reactnativenotifications.core.JsIOHelper;
 import com.wix.reactnativenotifications.core.NotificationIntentAdapter;
+import com.wix.reactnativenotifications.core.NotificationScheduler;
 import com.wix.reactnativenotifications.core.ProxyService;
 
 import static com.wix.reactnativenotifications.Defs.NOTIFICATION_OPENED_EVENT_NAME;
@@ -73,6 +76,11 @@ public class PushNotification implements IPushNotification {
     }
 
     @Override
+    public int onProjectSchedulerRequest(Integer notificationId) {
+        return postNotificationSchedule(notificationId);
+    }
+
+    @Override
     public PushNotificationProps asProps() {
         return mNotificationProps.copy();
     }
@@ -81,6 +89,12 @@ public class PushNotification implements IPushNotification {
         final PendingIntent pendingIntent = getCTAPendingIntent();
         final Notification notification = buildNotification(pendingIntent);
         return postNotification(notification, notificationId);
+    }
+
+    protected int postNotificationSchedule(Integer notificationId) {
+        final PendingIntent pendingIntent = getCTAPendingIntent();
+        final Notification notification = buildNotification(pendingIntent);
+        return postNotificationSchedule(notification, notificationId);
     }
 
     protected void digestNotification() {
@@ -155,6 +169,48 @@ public class PushNotification implements IPushNotification {
         final NotificationManager notificationManager = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(id, notification);
     }
+
+    public void postNotificationSchedule(Notification notification,  Integer notificationId) {
+
+        
+        long fireDate = mNotificationProps.getFireDate();
+        long interval = mNotificationProps.getRepeatInterval();
+        
+        if (fireDate == 0) {
+            Log.e(LOG_TAG, "react-native-notifications: No date specified for the scheduled notification");
+            return;
+        }
+        
+        Context context = getReactApplicationContext();
+        Intent notificationIntent = new Intent(context, NotificationScheduler.class);
+        notificationIntent.putExtra(NotificationScheduler.NOTIFICATION_ID, notificationId);
+        notificationIntent.putExtra(NotificationScheduler.NOTIFICATION, notification);
+        
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(
+            context, 
+            notificationId, 
+            notificationIntent, 
+            PendingIntent.FLAG_CANCEL_CURRENT
+            );
+
+        AlarmManager alarmManager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+        if (interval != -1) {
+            alarmManager.setRepeating(
+                    AlarmManager.RTC_WAKEUP,
+                    fireDate,
+                    interval,
+                    pendingIntent
+            ); 
+        } else {
+            alarmManager.set(
+                AlarmManager.RTC_WAKEUP,
+                fireDate,
+                pendingIntent
+            );
+        }
+    }
+
+
 
     protected void clearAllNotifications() {
         final NotificationManager notificationManager = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
