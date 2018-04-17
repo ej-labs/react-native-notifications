@@ -32,7 +32,7 @@ public class PushNotificationProps {
 
     private static long buildRepeatTimeMilis(long interval) {
         if (interval < 10000l) {
-            Log.e(Defs.LOGTAG, "notifications interval lowest value í 10s, your interval option will be set to 10s");
+            Log.e(Defs.LOGTAG, "notifications interval lowest value is 10s, your interval option will be set to 10s");
             return 10000l;
         }
         return interval;
@@ -78,6 +78,67 @@ public class PushNotificationProps {
     public String getBody() {
         return mBundle.getString("body");
     }
+
+    public boolean getAutoCancel(){
+        Boolean autoCancel = mBundle.getBoolean("autoCancel");
+        return autoCancel != null ? autoCancel : true;
+    }
+
+    public int getNumber() {
+        Double number = mBundle.getDouble("number");
+        int _intNumber = number != null ? number.intValue() : 0;
+        return _intNumber > 1 ? _intNumber : 1;
+    }
+
+    public String getLargeIcon() {
+        return mBundle.getString("largeIcon");
+    }
+
+    public String getSmallIcon() {
+        return mBundle.getString("smallIcon");
+    }
+
+    public Boolean getEnableLights() {
+        return mBundle.getBoolean("enableLights");
+    }
+
+    public String getSubText() {
+        return mBundle.getString("subText");
+    }
+
+    public Boolean getVibrate() {
+        return mBundle.getBoolean("vibrate");
+    }
+
+    // public String getTag() {
+    //     return mBundle.getString("tag");
+    // }
+
+    public String getGroup() {
+        return mBundle.getString("group");
+    }
+
+    public String getTicker() {
+        return mBundle.getString("ticker");
+    }
+
+    public String getSoundName() {
+        return mBundle.getString("soundName");
+    }
+
+    public String getCategory() {
+        return mBundle.getString("category");
+    }
+
+    public String getColor() {
+        return mBundle.getString("color");
+    }
+
+    public Boolean getSilent() {
+        Boolean silent =  mBundle.getBoolean("silent");
+        return silent != null ? silent : false;
+    }
+
 
     public long getFireDate() {
         try {

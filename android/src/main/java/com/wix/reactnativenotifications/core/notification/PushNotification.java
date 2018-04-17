@@ -6,6 +6,11 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.media.RingtoneManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -151,13 +156,101 @@ public class PushNotification implements IPushNotification {
     }
 
     protected Notification.Builder getNotificationBuilder(PendingIntent intent) {
-        return new Notification.Builder(mContext)
+        String ticker = mNotificationProps.getTicker();
+        String largeIcon = mNotificationProps.getLargeIcon();
+        String smallIcon = mNotificationProps.getSmallIcon();
+        String subText = mNotificationProps.getSubText();
+        String group = mNotificationProps.getGroup();
+        Resources res = mContext.getResources();
+
+        Notification.Builder notiBuilder = Notification.Builder(mContext)
                 .setContentTitle(mNotificationProps.getTitle())
                 .setContentText(mNotificationProps.getBody())
-                .setSmallIcon(mContext.getApplicationInfo().icon)
                 .setContentIntent(intent)
-                .setDefaults(Notification.DEFAULT_ALL)
-                .setAutoCancel(true);
+                .setNumber(mNotificationProps.getNumber())
+                .setAutoCancel(mNotificationProps.getAutoCancel());
+
+                // set small icon and large icon for notification.
+                int smallIconResId;
+                int largeIconResId;
+                if (smallIcon != null) {
+                    smallIconResId = res.getIdentifier(smallIcon, "mipmap", packageName);
+                } else {
+                    smallIconResId = res.getIdentifier("ic_notification", "mipmap", packageName);
+                }
+
+                if (smallIconResId == 0) {
+                    smallIconResId = res.getIdentifier("ic_launcher", "mipmap", packageName);
+    
+                    if (smallIconResId == 0) {
+                        smallIconResId = android.R.drawable.ic_dialog_info;
+                    }
+                }
+                notiBuilder.setSmallIcon(smallIconResId);
+
+                if (largeIcon != null) {
+                    largeIconResId = res.getIdentifier(largeIcon, "mipmap", packageName);
+                } else {
+                    largeIconResId = res.getIdentifier("ic_launcher", "mipmap", packageName);
+                }
+
+                Bitmap largeIconBitmap = BitmapFactory.decodeResource(res, largeIconResId);
+
+                if (largeIconResId != 0 && (largeIcon != null || Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)) {
+                    notiBuilder.setLargeIcon(largeIconBitmap);
+                }
+
+                if (ticker != null) {
+                    notiBuilder.setTicker(ticker);
+                }
+
+                if (group != null) {
+                    notiBuilder.setGroup(group);
+                }
+
+                if (subText != null) {
+                    notiBuilder.setSubText(subText);
+                }
+
+                if (mNotificationProps.getVibrate() == true) {
+                    notiBuilder.setVibrate(new long[] { 1000, 1000, 1000, 1000, 1000 });
+                }
+
+                if (mNotificationProps.getEnableLights() == true) {
+                    notiBuilder.setLights(android.graphics.Color.BLUE, 3000, 3000);
+                }
+
+                if (mNotificationProps.getSilent() == false) {
+                    Uri soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+                    String soundName = mNotificationProps.getSoundName();
+                    if (soundName != null) {
+                        if (!"default".equalsIgnoreCase(soundName)) {
+    
+                            // sound name can be full filename, or just the resource name.
+                            // So the strings 'my_sound.mp3' AND 'my_sound' are accepted
+                            // The reason is to make the iOS and android javascript interfaces compatible
+    
+                            int soundId = res.getIdentifier(soundName, "raw", mContext.getPackageName());
+                            if (soundId == 0) {
+                                soundName = soundName.substring(0, soundName.lastIndexOf('.'));
+                                soundId = context.getResources().getIdentifier(soundName, "raw", context.getPackageName());
+                            } 
+                            soundUri = soundId == 0 ? soundUri : Uri.parse("android.resource://" + mContext.getPackageName() + "/" + soundId);
+                        }
+                    }
+                    notiBuilder.setSound(soundUri);
+                }
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    notiBuilder.setCategory(Notification.CATEGORY_CALL);
+    
+                    String color = mNotificationProps.getColor();
+                    if (color != null) {
+                        notiBuilder.setColor(Color.parseColor(color));
+                    }
+                }
+
+        return notiBuilder;
     }
 
     protected int postNotification(Notification notification, Integer notificationId) {
