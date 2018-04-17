@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.facebook.react.bridge.ReactContext;
+import com.wix.reactnativenotifications.Defs;
 import com.wix.reactnativenotifications.core.AppLaunchHelper;
 import com.wix.reactnativenotifications.core.AppLifecycleFacade;
 import com.wix.reactnativenotifications.core.AppLifecycleFacade.AppVisibilityListener;
@@ -176,7 +177,7 @@ public class PushNotification implements IPushNotification {
         long interval = mNotificationProps.getRepeatInterval();
         
         if (fireDate == 0) {
-            Log.e("ReactNativeNotifications", "No date specified for the scheduled notification");
+            Log.e(Defs.LOGTAG, "No date specified for the scheduled notification");
             return notificationId;
         }
         
@@ -192,6 +193,7 @@ public class PushNotification implements IPushNotification {
             );
 
         AlarmManager alarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
+
         if (interval != -1) {
             alarmManager.setRepeating(
                     AlarmManager.RTC_WAKEUP,
@@ -200,7 +202,7 @@ public class PushNotification implements IPushNotification {
                     pendingIntent
             ); 
         } else {
-            alarmManager.set(
+            alarmManager.setExact(
                 AlarmManager.RTC_WAKEUP,
                 fireDate,
                 pendingIntent

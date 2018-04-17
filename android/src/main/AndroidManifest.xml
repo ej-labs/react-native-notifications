@@ -36,6 +36,12 @@
                 <category android:name="${applicationId}" />
             </intent-filter>
         </receiver>
+        <receiver android:name="com.wix.reactnativenotifications.core.NotificationScheduler" >
+            <intent-filter>
+            	<action android:name="RNNotificationsScheduler" >
+                </action>
+            </intent-filter>
+        </receiver>
         <!-- Dispatched by the GcmReceiver when messages are received. -->
         <service
             android:name="com.wix.reactnativenotifications.gcm.GcmMessageHandlerService"

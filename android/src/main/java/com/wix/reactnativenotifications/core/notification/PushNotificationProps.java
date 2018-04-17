@@ -1,5 +1,7 @@
 package com.wix.reactnativenotifications.core.notification;
 
+import com.wix.reactnativenotifications.Defs;
+
 import android.os.Bundle;
 import android.util.Log;
 
@@ -30,13 +32,19 @@ public class PushNotificationProps {
 
     private static long buildRepeatTimeMilis(long interval) {
         if (interval < 10000l) {
-            Log.e("ReactNativeNotifications", "react-native-notifications: notifications interval lowest value í 10s, your interval option will be set to 10s");
+            Log.e(Defs.LOGTAG, "notifications interval lowest value í 10s, your interval option will be set to 10s");
             return 10000l;
         }
         return interval;
     }
 
     private static long buildRepeatTimeMilis(String interval) {
+
+        if (interval == null) {
+            Log.e(Defs.LOGTAG, "repeatInterval not exist");
+            return -1l;
+        }
+
         switch (interval) {
             case "minute": 
                 return 60000l;
@@ -54,11 +62,11 @@ public class PushNotificationProps {
             try {
                 return buildRepeatTimeMilis(Long.parseLong(interval));
             } catch (NumberFormatException e) {
-                Log.e("ReactNativeNotifications", "react-native-notifications: parse interval error");
-                return -1;
+                Log.e(Defs.LOGTAG, "parse interval error");
+                return -1l;
             } catch (Exception e) {
-                Log.e("ReactNativeNotifications", "react-native-notifications: undeclared interval for scheduler notifications");
-                return -1;
+                Log.e(Defs.LOGTAG, "undeclared interval for scheduler notifications");
+                return -1l;
             }
         }
     }
@@ -76,14 +84,13 @@ public class PushNotificationProps {
             double fireDate =  mBundle.getDouble("fireDate");
             return Double.valueOf(fireDate).longValue();
         } catch (NumberFormatException e) {
-            Log.e("ReactNativeNotifications", "parse fire date error");
+            Log.e(Defs.LOGTAG, "parse fire date error");
             return 0l;
         }
     }
 
     public long getRepeatInterval() {
         String interval =  mBundle.getString("repeatInterval");
-        Log.e("ReactNativeNotifications", "interval value: " + interval);
         return buildRepeatTimeMilis(interval);
     }
 
