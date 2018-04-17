@@ -166,7 +166,6 @@ public class PushNotification implements IPushNotification {
         Resources resources = mContext.getResources();
         String packageName = mContext.getPackageName();
 
-
         Notification.Builder notiBuilder = new Notification.Builder(mContext)
                 .setContentTitle(mNotificationProps.getTitle())
                 .setContentText(mNotificationProps.getBody())
@@ -178,9 +177,9 @@ public class PushNotification implements IPushNotification {
                 int smallIconResId;
                 int largeIconResId;
                 if (smallIcon != null) {
-                    smallIconResId = resources.getIdentifier(smallIcon, "mipmap", packageName);
+                    smallIconResId = resources.getIdentifier(smallIcon, "drawable", packageName);
                 } else {
-                    smallIconResId = resources.getIdentifier("ic_notification", "mipmap", packageName);
+                    smallIconResId = resources.getIdentifier("ic_notification", "drawable", packageName);
                 }
 
                 if (smallIconResId == 0) {
@@ -190,6 +189,7 @@ public class PushNotification implements IPushNotification {
                         smallIconResId = android.R.drawable.ic_dialog_info;
                     }
                 }
+
                 notiBuilder.setSmallIcon(smallIconResId);
 
                 if (largeIcon != null) {

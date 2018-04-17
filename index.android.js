@@ -52,10 +52,8 @@ export class NotificationsAndroid {
   static localNotification(notification: Object) {
     const id = Math.random() * 100000000 | 0; // Bitwise-OR forces value onto a 32bit limit
     if (notification.repeatInterval || notification.fireDate) {
-      console.log("---------- react native notification: scheduler notifi with fire date:", notification.fireDate, "interval:", notification.repeatInterval);
       RNNotifications.postSchedulerLocalNotification(notification, id);
     } else {
-      console.log("---------- react native notification: not scheduler noti");
       RNNotifications.postLocalNotification(notification, id);
     }
     return id;

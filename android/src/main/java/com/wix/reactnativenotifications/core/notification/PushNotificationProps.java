@@ -99,7 +99,8 @@ public class PushNotificationProps {
     }
 
     public Boolean getEnableLights() {
-        return mBundle.getBoolean("enableLights");
+        Boolean enableLight = mBundle.getBoolean("enableLights");
+        return enableLight != null ? enableLight : true;
     }
 
     public String getSubText() {
@@ -107,7 +108,8 @@ public class PushNotificationProps {
     }
 
     public Boolean getVibrate() {
-        return mBundle.getBoolean("vibrate");
+        Boolean vibrate = mBundle.getBoolean("vibrate");
+        return vibrate != null ? vibrate : true;
     }
 
     // public String getTag() {
