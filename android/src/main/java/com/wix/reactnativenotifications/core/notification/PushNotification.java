@@ -161,9 +161,11 @@ public class PushNotification implements IPushNotification {
         String smallIcon = mNotificationProps.getSmallIcon();
         String subText = mNotificationProps.getSubText();
         String group = mNotificationProps.getGroup();
-        Resources res = mContext.getResources();
+        Resources resources = mContext.getResources();
+        String packageName = mContext.getPackageName();
 
-        Notification.Builder notiBuilder = Notification.Builder(mContext)
+
+        Notification.Builder notiBuilder = new Notification.Builder(mContext)
                 .setContentTitle(mNotificationProps.getTitle())
                 .setContentText(mNotificationProps.getBody())
                 .setContentIntent(intent)
@@ -174,13 +176,13 @@ public class PushNotification implements IPushNotification {
                 int smallIconResId;
                 int largeIconResId;
                 if (smallIcon != null) {
-                    smallIconResId = res.getIdentifier(smallIcon, "mipmap", packageName);
+                    smallIconResId = resources.getIdentifier(smallIcon, "mipmap", packageName);
                 } else {
-                    smallIconResId = res.getIdentifier("ic_notification", "mipmap", packageName);
+                    smallIconResId = resources.getIdentifier("ic_notification", "mipmap", packageName);
                 }
 
                 if (smallIconResId == 0) {
-                    smallIconResId = res.getIdentifier("ic_launcher", "mipmap", packageName);
+                    smallIconResId = resources.getIdentifier("ic_launcher", "mipmap", packageName);
     
                     if (smallIconResId == 0) {
                         smallIconResId = android.R.drawable.ic_dialog_info;
@@ -189,12 +191,12 @@ public class PushNotification implements IPushNotification {
                 notiBuilder.setSmallIcon(smallIconResId);
 
                 if (largeIcon != null) {
-                    largeIconResId = res.getIdentifier(largeIcon, "mipmap", packageName);
+                    largeIconResId = resources.getIdentifier(largeIcon, "mipmap", packageName);
                 } else {
-                    largeIconResId = res.getIdentifier("ic_launcher", "mipmap", packageName);
+                    largeIconResId = resources.getIdentifier("ic_launcher", "mipmap", packageName);
                 }
 
-                Bitmap largeIconBitmap = BitmapFactory.decodeResource(res, largeIconResId);
+                Bitmap largeIconBitmap = BitmapFactory.decodeResource(resources, largeIconResId);
 
                 if (largeIconResId != 0 && (largeIcon != null || Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)) {
                     notiBuilder.setLargeIcon(largeIconBitmap);
@@ -230,12 +232,12 @@ public class PushNotification implements IPushNotification {
                             // So the strings 'my_sound.mp3' AND 'my_sound' are accepted
                             // The reason is to make the iOS and android javascript interfaces compatible
     
-                            int soundId = res.getIdentifier(soundName, "raw", mContext.getPackageName());
+                            int soundId = resources.getIdentifier(soundName, "raw", packageName);
                             if (soundId == 0) {
                                 soundName = soundName.substring(0, soundName.lastIndexOf('.'));
-                                soundId = context.getResources().getIdentifier(soundName, "raw", context.getPackageName());
+                                soundId = resources.getIdentifier(soundName, "raw", packageName);
                             } 
-                            soundUri = soundId == 0 ? soundUri : Uri.parse("android.resource://" + mContext.getPackageName() + "/" + soundId);
+                            soundUri = soundId == 0 ? soundUri : Uri.parse("android.resource://" + packageName + "/" + soundId);
                         }
                     }
                     notiBuilder.setSound(soundUri);
