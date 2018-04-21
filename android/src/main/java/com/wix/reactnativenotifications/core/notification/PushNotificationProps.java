@@ -170,7 +170,4 @@ public class PushNotificationProps {
         return sb.toString();
     }
 
-    protected PushNotificationProps copy() {
-        return new PushNotificationProps((Bundle) mBundle.clone());
-    }
 }
