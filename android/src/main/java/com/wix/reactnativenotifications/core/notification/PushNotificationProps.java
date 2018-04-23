@@ -32,7 +32,7 @@ public class PushNotificationProps {
 
     private static long buildRepeatTimeMilis(long interval) {
         if (interval < 10000l) {
-            Log.e(Defs.LOGTAG, "notifications interval lowest value is 10s, your interval option will be set to 10s");
+            Log.w(Defs.LOGTAG, "notifications interval lowest value is 10s, your interval option will be set to 10s");
             return 10000l;
         }
         return interval;
@@ -41,7 +41,6 @@ public class PushNotificationProps {
     private static long buildRepeatTimeMilis(String interval) {
 
         if (interval == null) {
-            Log.e(Defs.LOGTAG, "repeatInterval not exist");
             return -1l;
         }
 
@@ -64,10 +63,7 @@ public class PushNotificationProps {
             } catch (NumberFormatException e) {
                 Log.e(Defs.LOGTAG, "parse interval error");
                 return -1l;
-            } catch (Exception e) {
-                Log.e(Defs.LOGTAG, "undeclared interval for scheduler notifications");
-                return -1l;
-            }
+            } 
         }
     }
 

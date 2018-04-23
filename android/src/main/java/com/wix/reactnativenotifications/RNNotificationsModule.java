@@ -94,7 +94,7 @@ public class RNNotificationsModule extends ReactContextBaseJavaModule implements
 
     @ReactMethod
     public void isRegisteredForRemoteNotifications(){
-        Log.e(LOGTAG, "android not yet suppot isRegisteredForRemoteNotifications native method");
+        Log.w(LOGTAG, "android not yet suppot isRegisteredForRemoteNotifications native method");
     }
 
     @ReactMethod
