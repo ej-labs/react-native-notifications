@@ -1,3 +1,7 @@
+/**
+ * @flow
+ */
+
 import {NativeModules, DeviceEventEmitter} from "react-native";
 import NotificationAndroid from "./notification";
 
@@ -59,8 +63,12 @@ export class NotificationsAndroid {
     return id;
   }
 
-  static cancelLocalNotification(id) {
+  static cancelLocalNotification(id: string) {
     RNNotifications.cancelLocalNotification(id);
+  }
+
+  static cancelAllLocalNotifications(){
+    RNNotifications.cancelAllLocalNotifications();
   }
 }
 
