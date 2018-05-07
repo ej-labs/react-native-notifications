@@ -15,8 +15,11 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.Patterns;
+import android.webkit.URLUtil;
 
 import com.facebook.react.bridge.ReactContext;
+import com.facebook.react.bridge.Promise;
 import com.wix.reactnativenotifications.Defs;
 import com.wix.reactnativenotifications.core.AppLaunchHelper;
 import com.wix.reactnativenotifications.core.AppLifecycleFacade;
@@ -30,6 +33,14 @@ import com.wix.reactnativenotifications.core.ProxyService;
 
 import static com.wix.reactnativenotifications.Defs.NOTIFICATION_OPENED_EVENT_NAME;
 import static com.wix.reactnativenotifications.Defs.NOTIFICATION_RECEIVED_EVENT_NAME;
+
+
+
+import java.net.URL;
+import java.nio.file.ProviderMismatchException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.io.IOException; 
 
 public class PushNotification implements IPushNotification {
 
@@ -68,7 +79,7 @@ public class PushNotification implements IPushNotification {
 
     @Override
     public void onReceived() throws InvalidNotificationException {
-        postNotification(null);
+        postNotification(null, false, null); //dont need to received any id;
         notifyReceivedToJS();
     }
 
@@ -79,25 +90,23 @@ public class PushNotification implements IPushNotification {
     }
 
     @Override
-    public int onPostRequest(Integer notificationId) {
-        return postNotification(notificationId);
+    public int onPostRequest(Integer notificationId, boolean isSchedule) {
+        return postNotification(notificationId, isSchedule, null);
     }
 
-    @Override
-    public int onProjectSchedulerRequest(Integer notificationId) {
-        return postNotificationSchedule(notificationId);
-    }
 
-    protected int postNotification(Integer notificationId) {
-        final PendingIntent pendingIntent = getCTAPendingIntent();
-        final Notification notification = buildNotification(pendingIntent);
-        return postNotification(notification, notificationId);
-    }
+    // TODO: async task here
+    protected int postNotification(Integer notificationId, boolean isSchedule, Promise promise) {
+        // final PendingIntent pendingIntent = getCTAPendingIntent();
+        // final Notification notification = buildNotification(pendingIntent);
+       AsyncNotificationBuilder noti = new AsyncNotificationBuilder(
+        notificationId, 
+        isSchedule,
+        promise
+        );
 
-    protected int postNotificationSchedule(Integer notificationId) {
-        final PendingIntent pendingIntent = getCTAPendingIntent();
-        final Notification notification = buildNotification(pendingIntent);
-        return postNotificationSchedule(notification, notificationId);
+        noti.execute();
+        return notificationId;
     }
 
     protected void digestNotification() {
@@ -168,37 +177,6 @@ public class PushNotification implements IPushNotification {
                 .setNumber(mNotificationProps.getNumber())
                 .setAutoCancel(mNotificationProps.getAutoCancel());
 
-                // set small icon and large icon for notification.
-                int smallIconResId;
-                int largeIconResId;
-                if (smallIcon != null) {
-                    smallIconResId = resources.getIdentifier(smallIcon, "drawable", packageName);
-                } else {
-                    smallIconResId = resources.getIdentifier("ic_notification", "drawable", packageName);
-                }
-
-                if (smallIconResId == 0) {
-                    smallIconResId = resources.getIdentifier("ic_launcher", "mipmap", packageName);
-    
-                    if (smallIconResId == 0) {
-                        smallIconResId = android.R.drawable.ic_dialog_info;
-                    }
-                }
-
-                notiBuilder.setSmallIcon(smallIconResId);
-
-                if (largeIcon != null) {
-                    largeIconResId = resources.getIdentifier(largeIcon, "mipmap", packageName);
-                } else {
-                    largeIconResId = resources.getIdentifier("ic_launcher", "mipmap", packageName);
-                }
-
-                Bitmap largeIconBitmap = BitmapFactory.decodeResource(resources, largeIconResId);
-
-                if (largeIconResId != 0 && (largeIcon != null || Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)) {
-                    notiBuilder.setLargeIcon(largeIconBitmap);
-                }
-
                 if (ticker != null) {
                     notiBuilder.setTicker(ticker);
                 }
@@ -252,15 +230,16 @@ public class PushNotification implements IPushNotification {
         return notiBuilder;
     }
 
+    
+    protected void postNotification(int id, Notification notification) {
+        final NotificationManager notificationManager = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.notify(id, notification);
+    }
+    
     protected int postNotification(Notification notification, Integer notificationId) {
         int id = notificationId != null ? notificationId : createNotificationId(notification);
         postNotification(id, notification);
         return id;
-    }
-
-    protected void postNotification(int id, Notification notification) {
-        final NotificationManager notificationManager = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(id, notification);
     }
 
     public int postNotificationSchedule(Notification notification,  Integer notificationId) {
@@ -327,4 +306,119 @@ public class PushNotification implements IPushNotification {
         final Intent intent = mAppLaunchHelper.getLaunchIntent(mContext);
         mContext.startActivity(intent);
     }
+
+    private void setNotiSmallIcon(Notification.Builder notiBuilder, String smallIcon) {
+        int smallIconResId;
+        if (smallIcon != null) {
+            smallIconResId = resources.getIdentifier(smallIcon, "drawable", packageName);
+        } else {
+            smallIconResId = resources.getIdentifier("ic_notification", "drawable", packageName);
+        }
+
+        if (smallIconResId == 0) {
+            smallIconResId = resources.getIdentifier("ic_launcher", "mipmap", packageName);
+
+            if (smallIconResId == 0) {
+                smallIconResId = android.R.drawable.ic_dialog_info;
+            }
+        }
+
+        notiBuilder.setSmallIcon(smallIconResId);
+    }
+
+    private void setNotiLargeIcon(Notification.Builder notiBuilder, Bitmap bitmap){
+        Bitmap largeIconBitmap = bitmap;
+        String largeIcon = mNotificationProps.getLargeIcon();
+        int largeIconResId;
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) return;
+
+        if (largeIconBitmap != null) {
+            notiBuilder.setLargeIcon(largeIconBitmap);
+            return;
+        }
+
+        if (largeIcon != null) {
+            largeIconResId = resources.getIdentifier(largeIcon, "mipmap", packageName);
+        } else {
+            largeIconResId = resources.getIdentifier("ic_launcher", "mipmap", packageName);
+        }
+        
+        largeIconBitmap = BitmapFactory.decodeResource(resources, largeIconResId);
+
+        if (largeIconBitmap != null) {
+            notiBuilder.setLargeIcon(largeIconBitmap);
+        }
+    }
+
+    private static boolean isValidUrl(String url) {
+        return URLUtil.isValidUrl(url) && Patterns.WEB_URL.matcher(url).matches();
+    }
+
+    // inner class
+    private class AsyncNotificationBuilder extends AsyncTask<Void, Void, Bitmap> {
+
+        private String id;
+        private boolean isSchedule;
+        private Promise promise;
+        private String url;
+      
+        public AsyncNotificationBuilder(String id, boolean isSchedule, Promise promise) {
+            super();
+            this.id = id;
+            this.isSchedule = isSchedule;
+            this.promise = promise;
+            String _url = mNotificationProps.getLargeIcon();
+            this.url = PushNotification.isValidUrl(_url) ? null : _url;
+        }
+      
+      
+        @Override
+        protected Bitmap doInBackground() {
+            if (this.url == null) return null;
+            InputStream in;
+            try {
+                URL url = new URL(this.url);
+                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                connection.setDoInput(true);
+                connection.connect();
+                in = connection.getInputStream();
+                Bitmap myBitmap = BitmapFactory.decodeStream(in);
+                return myBitmap;
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+              connection.disconnect();
+            }
+            return null;
+        }
+      
+        @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+        @Override
+        protected void onPostExecute(Bitmap result) {
+            int result;
+
+            super.onPostExecute(result);
+
+            String smallIcon = mNotificationProps.getSmallIcon();
+      
+            final PendingIntent pendingIntent = getCTAPendingIntent();
+            Notification.Builder notiBuilder = getNotificationBuilder(pendingIntent);
+            setNotiSmallIcon(notiBuilder, smallIcon);
+            setNotiLargeIcon(notiBuilder, result);
+            Notification notification = notiBuilder.build();
+
+            if (this.isSchedule) {
+                result = postNotificationSchedule(notification, this.id);
+            } else {
+                result = postNotification(notification, this.id);
+            }
+
+            if (this.promise != null) {
+                this.promise.resolve(result);
+            }
+        }
+      }
 }

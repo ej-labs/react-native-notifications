@@ -1,5 +1,7 @@
 package com.wix.reactnativenotifications.core.notification;
 
+import com.facebook.react.bridge.Promise;
+
 public interface IPushNotification {
     class InvalidNotificationException extends Exception {
         public InvalidNotificationException(String detailMessage) {
@@ -26,6 +28,5 @@ public interface IPushNotification {
      */
     int onPostRequest(Integer notificationId);
 
-    int onProjectSchedulerRequest(Integer notificationId);
-    
+    int onPostRequest(Integer notificationId, boolean isSchedule, Promise promise);
 }
