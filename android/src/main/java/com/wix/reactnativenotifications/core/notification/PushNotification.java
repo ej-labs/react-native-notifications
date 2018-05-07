@@ -1,10 +1,12 @@
 package com.wix.reactnativenotifications.core.notification;
 
 import android.app.AlarmManager;
+import android.os.AsyncTask;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.annotation.TargetApi;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -37,6 +39,7 @@ import static com.wix.reactnativenotifications.Defs.NOTIFICATION_RECEIVED_EVENT_
 
 
 import java.net.URL;
+import 	java.io.InputStream;
 import java.nio.file.ProviderMismatchException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -90,8 +93,8 @@ public class PushNotification implements IPushNotification {
     }
 
     @Override
-    public int onPostRequest(Integer notificationId, boolean isSchedule) {
-        return postNotification(notificationId, isSchedule, null);
+    public int onPostRequest(Integer notificationId, boolean isSchedule, Promise promise) {
+        return postNotification(notificationId, isSchedule, promise);
     }
 
 
@@ -309,6 +312,9 @@ public class PushNotification implements IPushNotification {
 
     private void setNotiSmallIcon(Notification.Builder notiBuilder, String smallIcon) {
         int smallIconResId;
+        String packageName = mContext.getPackageName();
+        Resources resources = mContext.getResources();
+        
         if (smallIcon != null) {
             smallIconResId = resources.getIdentifier(smallIcon, "drawable", packageName);
         } else {
@@ -330,6 +336,9 @@ public class PushNotification implements IPushNotification {
         Bitmap largeIconBitmap = bitmap;
         String largeIcon = mNotificationProps.getLargeIcon();
         int largeIconResId;
+        String packageName = mContext.getPackageName();
+        Resources resources = mContext.getResources();
+        
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) return;
 
@@ -356,14 +365,14 @@ public class PushNotification implements IPushNotification {
     }
 
     // inner class
-    private class AsyncNotificationBuilder extends AsyncTask<Void, Void, Bitmap> {
+    class AsyncNotificationBuilder extends AsyncTask<Void, Void, Bitmap> {
 
-        private String id;
+        private int id;
         private boolean isSchedule;
         private Promise promise;
         private String url;
       
-        public AsyncNotificationBuilder(String id, boolean isSchedule, Promise promise) {
+        public AsyncNotificationBuilder(int id, boolean isSchedule, Promise promise) {
             super();
             this.id = id;
             this.isSchedule = isSchedule;
@@ -377,9 +386,10 @@ public class PushNotification implements IPushNotification {
         protected Bitmap doInBackground() {
             if (this.url == null) return null;
             InputStream in;
+            HttpURLConnection connection;
             try {
                 URL url = new URL(this.url);
-                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                connection = (HttpURLConnection) url.openConnection();
                 connection.setDoInput(true);
                 connection.connect();
                 in = connection.getInputStream();
@@ -390,7 +400,7 @@ public class PushNotification implements IPushNotification {
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
-              connection.disconnect();
+              if(connection!= null) connection.disconnect();
             }
             return null;
         }
