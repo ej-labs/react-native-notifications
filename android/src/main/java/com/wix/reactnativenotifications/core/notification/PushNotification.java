@@ -46,10 +46,12 @@ import java.io.IOException;
 public class PushNotification implements IPushNotification {
 
     final protected Context mContext;
+    final protected int mId;
     final protected AppLifecycleFacade mAppLifecycleFacade;
     final protected AppLaunchHelper mAppLaunchHelper;
     final protected JsIOHelper mJsIOHelper;
     final protected PushNotificationProps mNotificationProps;
+    protected PendingIntent shedulePendingIntent = null;
     final protected AppVisibilityListener mAppVisibilityListener = new AppVisibilityListener() {
         @Override
         public void onAppVisible() {
@@ -62,15 +64,36 @@ public class PushNotification implements IPushNotification {
         }
     };
 
-    public static IPushNotification get(Context context, Bundle bundle) {
+    public static IPushNotification get(int id, Context context, Bundle bundle) {
         Context appContext = context.getApplicationContext();
         if (appContext instanceof INotificationsApplication) {
-            return ((INotificationsApplication) appContext).getPushNotification(context, bundle, AppLifecycleFacadeHolder.get(), new AppLaunchHelper());
+            return ((INotificationsApplication) appContext).getPushNotification(
+                context, 
+                bundle, 
+                AppLifecycleFacadeHolder.get(), 
+                new AppLaunchHelper()
+                );
         }
-        return new PushNotification(context, bundle, AppLifecycleFacadeHolder.get(), new AppLaunchHelper(), new JsIOHelper());
+
+        return new PushNotification(
+            id, 
+            context, 
+            bundle, 
+            AppLifecycleFacadeHolder.get(), 
+            new AppLaunchHelper(), 
+            new JsIOHelper()
+            );
     }
 
-    protected PushNotification(Context context, Bundle bundle, AppLifecycleFacade appLifecycleFacade, AppLaunchHelper appLaunchHelper, JsIOHelper JsIOHelper) {
+    protected PushNotification(
+        int id, 
+        Context context, 
+        Bundle bundle, 
+        AppLifecycleFacade appLifecycleFacade, 
+        AppLaunchHelper appLaunchHelper, 
+        JsIOHelper JsIOHelper
+        ) {
+        mId = id;
         mContext = context;
         mAppLifecycleFacade = appLifecycleFacade;
         mAppLaunchHelper = appLaunchHelper;
@@ -87,7 +110,7 @@ public class PushNotification implements IPushNotification {
     @Override
     public void onOpened() {
         digestNotification();
-        clearAllNotifications();
+        clearNotifications();
     }
 
     @Override
@@ -96,10 +119,8 @@ public class PushNotification implements IPushNotification {
     }
 
 
-    // TODO: async task here
+    /* Async function resolve by react promise register notification and schedule it */
     protected int postNotification(Integer notificationId, boolean isSchedule, Promise promise) {
-        // final PendingIntent pendingIntent = getCTAPendingIntent();
-        // final Notification notification = buildNotification(pendingIntent);
        AsyncNotificationBuilder noti = new AsyncNotificationBuilder(
         notificationId, 
         isSchedule,
@@ -262,6 +283,8 @@ public class PushNotification implements IPushNotification {
             PendingIntent.FLAG_CANCEL_CURRENT
             );
 
+        shedulePendingIntent = pendingIntent;
+
         AlarmManager alarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
 
         if (interval != -1) {
@@ -282,11 +305,11 @@ public class PushNotification implements IPushNotification {
         return notificationId;
     }
 
-
-
-    protected void clearAllNotifications() {
+    protected void clearNotifications(){
         final NotificationManager notificationManager = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.cancelAll();
+        notificationManager.cancel(mId);
+        AlarmManager alarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
+        alarmManager.cancel(shedulePendingIntent);
     }
 
     protected int createNotificationId(Notification notification) {
@@ -338,7 +361,6 @@ public class PushNotification implements IPushNotification {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) return;
 
         if (largeIconBitmap != null) {
-            Log.w(Defs.LOGTAG, "case choose licon 1");
             notiBuilder.setLargeIcon(largeIconBitmap);
             return;
         }
@@ -371,7 +393,6 @@ public class PushNotification implements IPushNotification {
             this.isSchedule = isSchedule;
             this.promise = promise;
             String _url = mNotificationProps.getLargeIcon();
-            Log.w(Defs.LOGTAG, "url: " + (_url != null ?  _url : "null"));
             this.url = CoreHelper.isValidUrl(_url) ? _url : null;
         }
       
@@ -382,7 +403,6 @@ public class PushNotification implements IPushNotification {
             InputStream in;
             HttpURLConnection connection = null;
             try {
-                Log.w(Defs.LOGTAG, "url: " + this.url);
                 URL url = new URL(this.url);
                 connection = (HttpURLConnection) url.openConnection();
                 connection.setDoInput(true);
@@ -391,7 +411,6 @@ public class PushNotification implements IPushNotification {
                 Bitmap myBitmap = BitmapFactory.decodeStream(in);
                 Resources resources = mContext.getResources();
                 int dpi = CoreHelper.getDeivceDPI(resources.getDisplayMetrics());
-                Log.w(Defs.LOGTAG, "dpi: " + dpi);
                 return CoreHelper.makeLargeIcon(myBitmap, dpi);
             } catch (MalformedURLException e) {
                 e.printStackTrace();
@@ -403,19 +422,16 @@ public class PushNotification implements IPushNotification {
             return null;
         }
       
-        // @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
         @Override
         protected void onPostExecute(Bitmap img) {
             super.onPostExecute(img);
 
             int result;
             String smallIcon = mNotificationProps.getSmallIcon();
-      
             final PendingIntent pendingIntent = getCTAPendingIntent();
             Notification.Builder notiBuilder = getNotificationBuilder(pendingIntent);
+            
             setNotiSmallIcon(notiBuilder, smallIcon);
-            super.onPostExecute(img);
-            Log.w(Defs.LOGTAG, "bitmap" + (img == null ? "null" : "ok"));
             setNotiLargeIcon(notiBuilder, img);
             Notification notification = notiBuilder.build();
 
