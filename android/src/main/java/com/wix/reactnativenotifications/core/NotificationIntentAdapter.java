@@ -10,8 +10,8 @@ import com.wix.reactnativenotifications.core.notification.PushNotificationProps;
 public class NotificationIntentAdapter {
     private static final String PUSH_NOTIFICATION_EXTRA_NAME = "pushNotification";
 
-    public static PendingIntent createPendingNotificationIntent(Context appContext, Intent intent, PushNotificationProps notification) {
-        intent.putExtra(PUSH_NOTIFICATION_EXTRA_NAME, notification.asBundle());
+    public static PendingIntent createPendingNotificationIntent(Context appContext, Intent intent, PushNotificationProps notificationProps) {
+        intent.putExtra(PUSH_NOTIFICATION_EXTRA_NAME, notificationProps.asBundle());
         return PendingIntent.getService(appContext, (int) System.currentTimeMillis(), intent, PendingIntent.FLAG_ONE_SHOT);
     }
 

@@ -46,11 +46,11 @@ import java.io.IOException;
 public class PushNotification implements IPushNotification {
 
     final protected Context mContext;
-    final protected int mId;
     final protected AppLifecycleFacade mAppLifecycleFacade;
     final protected AppLaunchHelper mAppLaunchHelper;
     final protected JsIOHelper mJsIOHelper;
     final protected PushNotificationProps mNotificationProps;
+    protected Integer mId = null;
     protected PendingIntent shedulePendingIntent = null;
     final protected AppVisibilityListener mAppVisibilityListener = new AppVisibilityListener() {
         @Override
@@ -64,7 +64,7 @@ public class PushNotification implements IPushNotification {
         }
     };
 
-    public static IPushNotification get(int id, Context context, Bundle bundle) {
+    public static IPushNotification get(Integer id, Context context, Bundle bundle) {
         Context appContext = context.getApplicationContext();
         if (appContext instanceof INotificationsApplication) {
             return ((INotificationsApplication) appContext).getPushNotification(
@@ -76,29 +76,30 @@ public class PushNotification implements IPushNotification {
         }
 
         return new PushNotification(
-            id, 
-            context, 
-            bundle, 
-            AppLifecycleFacadeHolder.get(), 
-            new AppLaunchHelper(), 
+            id,
+            context,
+            bundle,
+            AppLifecycleFacadeHolder.get(),
+            new AppLaunchHelper(),
             new JsIOHelper()
             );
     }
 
     protected PushNotification(
-        int id, 
-        Context context, 
-        Bundle bundle, 
-        AppLifecycleFacade appLifecycleFacade, 
-        AppLaunchHelper appLaunchHelper, 
+        Integer id,
+        Context context,
+        Bundle bundle,
+        AppLifecycleFacade appLifecycleFacade,
+        AppLaunchHelper appLaunchHelper,
         JsIOHelper JsIOHelper
         ) {
-        mId = id;
+        int _id = id == null ? CoreHelper.createNotificationId() : id;
+        mId = _id;
         mContext = context;
         mAppLifecycleFacade = appLifecycleFacade;
         mAppLaunchHelper = appLaunchHelper;
         mJsIOHelper = JsIOHelper;
-        mNotificationProps = createProps(bundle);
+        mNotificationProps = createProps(id, bundle);
     }
 
     @Override
@@ -150,8 +151,8 @@ public class PushNotification implements IPushNotification {
         }
     }
 
-    protected PushNotificationProps createProps(Bundle bundle) {
-        return new PushNotificationProps(bundle);
+    protected PushNotificationProps createProps(int id, Bundle bundle) {
+        return new PushNotificationProps(id, bundle);
     }
 
     protected void setAsInitialNotification() {
@@ -256,8 +257,7 @@ public class PushNotification implements IPushNotification {
         notificationManager.notify(id, notification);
     }
     
-    protected int postNotification(Notification notification, Integer notificationId) {
-        int id = notificationId != null ? notificationId : createNotificationId(notification);
+    protected int postNotification(Notification notification, int notificationId) {
         postNotification(id, notification);
         return id;
     }
@@ -306,16 +306,15 @@ public class PushNotification implements IPushNotification {
     }
 
     protected void clearNotifications(){
-        final NotificationManager notificationManager = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.cancel(mId);
-        if(shedulePendingIntent != null) {
+        if (mId != null) {
+            final NotificationManager notificationManager = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+            notificationManager.cancel(mId);
+        }
+
+        if (shedulePendingIntent != null) {
             AlarmManager alarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
             alarmManager.cancel(shedulePendingIntent);
         }
-    }
-
-    protected int createNotificationId(Notification notification) {
-        return (int) System.nanoTime();
     }
 
     private void notifyReceivedToJS() {

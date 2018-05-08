@@ -9,25 +9,30 @@ public class PushNotificationProps {
 
     protected Bundle mBundle;
 
-    public PushNotificationProps() {
-        mBundle = new Bundle();
-    }
+    // public PushNotificationProps() {
+    //     mBundle = new Bundle();
+    // }
 
-    public PushNotificationProps(
-            String title,
-            String body,
-            String fireDate,
-            String repeatInterval
-    ) {
-        mBundle = new Bundle();
-        mBundle.putString("title", title);
-        mBundle.putString("body", body);
-        mBundle.putString("fireDate", fireDate);
-        mBundle.putString("repeatInterval", repeatInterval);
-    }
+    // public PushNotificationProps(
+    //         String title,
+    //         String body,
+    //         String fireDate,
+    //         String repeatInterval
+    // ) {
+    //     mBundle = new Bundle();
+    //     mBundle.putString("title", title);
+    //     mBundle.putString("body", body);
+    //     mBundle.putString("fireDate", fireDate);
+    //     mBundle.putString("repeatInterval", repeatInterval);
+    // }
 
-    public PushNotificationProps(Bundle bundle) {
+    // public PushNotificationProps(Bundle bundle) {
+    //     mBundle = bundle;
+    // }
+
+    public PushNotificationProps(int id, Bundle bundle) {
         mBundle = bundle;
+        mBundle.putInt("id", id);        
     }
 
     private static long buildRepeatTimeMilis(long interval) {
@@ -69,6 +74,10 @@ public class PushNotificationProps {
 
     public String getTitle() {
         return mBundle.getString("title");
+    }
+
+    public Int getId(){
+        return mBundle.getInt("id");
     }
 
     public String getBody() {

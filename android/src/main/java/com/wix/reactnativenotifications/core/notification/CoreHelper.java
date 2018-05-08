@@ -5,7 +5,7 @@ import android.webkit.URLUtil;
 import android.graphics.Bitmap;
 import android.util.Patterns;
 
-class CoreHelper {
+public class CoreHelper {
 
   static boolean isValidUrl(String url) {
     return URLUtil.isValidUrl(url) && Patterns.WEB_URL.matcher(url).matches();
@@ -53,6 +53,10 @@ class CoreHelper {
       default:
         return (float) 192 / size;
     }
+  }
+
+  public static int createNotificationId() {
+    return (int) System.nanoTime();
   }
 
   static Bitmap makeLargeIcon(Bitmap image, int dpi){

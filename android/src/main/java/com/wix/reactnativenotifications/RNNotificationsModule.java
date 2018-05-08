@@ -75,10 +75,15 @@ public class RNNotificationsModule extends ReactContextBaseJavaModule implements
     }
 
     @ReactMethod
-    public void postLocalNotification(ReadableMap notificationPropsMap, int notificationId, Promise promise) {
+    public void postLocalNotification(
+        ReadableMap notificationPropsMap, 
+        int notificationId, 
+        Promise promise
+        ) {
         Log.d(LOGTAG, "Native method invocation: postLocalNotification");
         final Bundle notificationProps = Arguments.toBundle(notificationPropsMap);
         final IPushNotification pushNotification = PushNotification.get(
+            notificationId,
             getReactApplicationContext().getApplicationContext(), 
             notificationProps
             );
@@ -86,12 +91,17 @@ public class RNNotificationsModule extends ReactContextBaseJavaModule implements
     }
 
     @ReactMethod
-    public void postSchedulerLocalNotification(ReadableMap notificationPropsMap, int notificationId, Promise promise) {
+    public void postSchedulerLocalNotification(
+        ReadableMap notificationPropsMap, 
+        int notificationId, 
+        Promise promise
+        ) {
         Log.d(LOGTAG, "Native method invocation: postSchedulerLocalNotification");
         // create bundle
         final Bundle notificationProps = Arguments.toBundle(notificationPropsMap);
         // create Push Notification instant
         final IPushNotification pushNotification = PushNotification.get(
+            notificationId,
             getReactApplicationContext().getApplicationContext(), 
             notificationProps
             );

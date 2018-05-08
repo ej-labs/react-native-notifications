@@ -9,6 +9,7 @@ import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.wix.reactnativenotifications.core.notification.IPushNotification;
 import com.wix.reactnativenotifications.core.notification.PushNotification;
+import com.wix.reactnativenotifications.core.notification.CoreHelper;
 
 import static com.wix.reactnativenotifications.Defs.LOGTAG;
 
@@ -25,7 +26,10 @@ public class FcmMessageHandlerService extends FirebaseMessagingService {
                 bundle.putString(entry.getKey(), entry.getValue());
             }
 
-            final IPushNotification notification = PushNotification.get(getApplicationContext(), bundle);
+            Int id = bundle.getInt("id");
+            if (id == null) id = CoreHelper.createNotificationId();
+
+            final IPushNotification notification = PushNotification.get(id, getApplicationContext(), bundle);
             notification.onReceived();
         } catch (IPushNotification.InvalidNotificationException e) {
             // Received a message, but not the kind we know how to work with.
