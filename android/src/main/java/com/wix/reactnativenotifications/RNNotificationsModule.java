@@ -112,9 +112,8 @@ public class RNNotificationsModule extends ReactContextBaseJavaModule implements
 
     @ReactMethod
     public void cancelAllLocalNotifications() {
-        Context mContext = getReactApplicationContext().getApplicationContext();
-        final NotificationManager notificationManager = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.cancelAll();
+        IPushNotificationsDrawer notificationsDrawer = PushNotificationsDrawer.get(getReactApplicationContext().getApplicationContext());
+        notificationsDrawer.onNotificationClearAllRequest();
     }
 
     @Override

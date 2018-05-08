@@ -308,8 +308,10 @@ public class PushNotification implements IPushNotification {
     protected void clearNotifications(){
         final NotificationManager notificationManager = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.cancel(mId);
-        AlarmManager alarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
-        alarmManager.cancel(shedulePendingIntent);
+        if(shedulePendingIntent != null) {
+            AlarmManager alarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
+            alarmManager.cancel(shedulePendingIntent);
+        }
     }
 
     protected int createNotificationId(Notification notification) {
