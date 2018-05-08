@@ -17,8 +17,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
-import android.util.Patterns;
-import android.webkit.URLUtil;
 
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.Promise;
@@ -166,8 +164,6 @@ public class PushNotification implements IPushNotification {
 
     protected Notification.Builder getNotificationBuilder(PendingIntent intent) {
         String ticker = mNotificationProps.getTicker();
-        String largeIcon = mNotificationProps.getLargeIcon();
-        String smallIcon = mNotificationProps.getSmallIcon();
         String subText = mNotificationProps.getSubText();
         String group = mNotificationProps.getGroup();
         Resources resources = mContext.getResources();
@@ -338,11 +334,11 @@ public class PushNotification implements IPushNotification {
         int largeIconResId;
         String packageName = mContext.getPackageName();
         Resources resources = mContext.getResources();
-        
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) return;
 
         if (largeIconBitmap != null) {
+            Log.w(Defs.LOGTAG, "case choose licon 1");
             notiBuilder.setLargeIcon(largeIconBitmap);
             return;
         }
@@ -360,12 +356,9 @@ public class PushNotification implements IPushNotification {
         }
     }
 
-    private static boolean isValidUrl(String url) {
-        return URLUtil.isValidUrl(url) && Patterns.WEB_URL.matcher(url).matches();
-    }
 
     // inner class
-    class AsyncNotificationBuilder extends AsyncTask<Void, Void, Bitmap> {
+    class AsyncNotificationBuilder extends AsyncTask<String, Void, Bitmap> {
 
         private int id;
         private boolean isSchedule;
@@ -378,46 +371,52 @@ public class PushNotification implements IPushNotification {
             this.isSchedule = isSchedule;
             this.promise = promise;
             String _url = mNotificationProps.getLargeIcon();
-            this.url = PushNotification.isValidUrl(_url) ? null : _url;
+            Log.w(Defs.LOGTAG, "url: " + _url != null ? "null" : _url);
+            this.url = CoreHelper.isValidUrl(_url) ? null : _url;
         }
       
       
         @Override
-        protected Bitmap doInBackground() {
+        protected Bitmap doInBackground(String... strings) {
             if (this.url == null) return null;
             InputStream in;
-            HttpURLConnection connection;
+            HttpURLConnection connection = null;
             try {
+                Log.w(Defs.LOGTAG, "url: " + this.url);
                 URL url = new URL(this.url);
                 connection = (HttpURLConnection) url.openConnection();
                 connection.setDoInput(true);
                 connection.connect();
                 in = connection.getInputStream();
                 Bitmap myBitmap = BitmapFactory.decodeStream(in);
-                return myBitmap;
+                Resources resources = mContext.getResources();
+                int dpi = CoreHelper.getDeivceDPI(resources.getDisplayMetrics());
+                Log.w(Defs.LOGTAG, "dpi: " + dpi);
+                return CoreHelper.makeLargeIcon(myBitmap, dpi);
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
-              if(connection!= null) connection.disconnect();
+              if(connection != null) connection.disconnect();
             }
             return null;
         }
       
-        @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+        // @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
         @Override
-        protected void onPostExecute(Bitmap result) {
+        protected void onPostExecute(Bitmap img) {
+            super.onPostExecute(img);
+
             int result;
-
-            super.onPostExecute(result);
-
             String smallIcon = mNotificationProps.getSmallIcon();
       
             final PendingIntent pendingIntent = getCTAPendingIntent();
             Notification.Builder notiBuilder = getNotificationBuilder(pendingIntent);
             setNotiSmallIcon(notiBuilder, smallIcon);
-            setNotiLargeIcon(notiBuilder, result);
+            super.onPostExecute(img);
+            Log.w(Defs.LOGTAG, "bitmap" + img == null ? "null" : "ok");
+            setNotiLargeIcon(notiBuilder, img);
             Notification notification = notiBuilder.build();
 
             if (this.isSchedule) {

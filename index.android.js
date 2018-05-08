@@ -63,7 +63,7 @@ export class NotificationsAndroid {
     return id;
   }
 
-  static cancelLocalNotification(id: string) {
+  static cancelLocalNotification(id: number) {
     RNNotifications.cancelLocalNotification(id);
   }
 
