@@ -258,8 +258,8 @@ public class PushNotification implements IPushNotification {
     }
     
     protected int postNotification(Notification notification, int notificationId) {
-        postNotification(id, notification);
-        return id;
+        postNotification(notificationId, notification);
+        return notificationId;
     }
 
     public int postNotificationSchedule(Notification notification,  Integer notificationId) {

@@ -26,7 +26,7 @@ public class FcmMessageHandlerService extends FirebaseMessagingService {
                 bundle.putString(entry.getKey(), entry.getValue());
             }
 
-            Int id = bundle.getInt("id");
+            Integer id = bundle.getInt("id");
             if (id == null) id = CoreHelper.createNotificationId();
 
             final IPushNotification notification = PushNotification.get(id, getApplicationContext(), bundle);

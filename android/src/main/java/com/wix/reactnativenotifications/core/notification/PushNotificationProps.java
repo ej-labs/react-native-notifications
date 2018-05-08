@@ -76,7 +76,7 @@ public class PushNotificationProps {
         return mBundle.getString("title");
     }
 
-    public Int getId(){
+    public Integer getId(){
         return mBundle.getInt("id");
     }
 
