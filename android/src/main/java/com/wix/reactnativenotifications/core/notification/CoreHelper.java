@@ -2,6 +2,7 @@ package com.wix.reactnativenotifications.core.notification;
 
 import android.util.DisplayMetrics;
 import android.webkit.URLUtil;
+import android.graphics.Bitmap;
 import android.util.Patterns;
 
 class CoreHelper {
@@ -46,7 +47,7 @@ class CoreHelper {
       case DisplayMetrics.DENSITY_XXHIGH:
         return (float) 192 / size;
 
-      case DisplayMetrics.DENSITY_XXHIGH:
+      case DisplayMetrics.DENSITY_XXXHIGH:
         return (float) 256 / size;
 
       default:
@@ -58,15 +59,16 @@ class CoreHelper {
     Bitmap icon = image;
     int imageHeight = icon.getHeight(); //get original image height
     int imageWidth = icon.getWidth();
-    int shortenSize = imageWidth < imageHeight ? imageWidth : imageHeight;
+    int shorterSide = imageWidth < imageHeight ? imageWidth : imageHeight;
+    int longerSide = imageWidth < imageHeight ? imageHeight : imageWidth;
     boolean portrait = imageWidth < imageHeight ? true : false;
     int lengthToCrop = (longerSide - shorterSide) / 2;
     int startX = portrait ? 0 : lengthToCrop;
     int startY = portrait ? lengthToCrop : 0;
-    icon = Bitmap.createBitmap(icon, startX, startY, shortenSize, shortenSize);
+    icon = Bitmap.createBitmap(icon, startX, startY, shorterSide, shorterSide);
 
-    float multiple = getScaleMultiple(dpi, shortenSize);
-    int newSize = Math.round(shortenSize * multiple);
+    float multiple = getScaleMultiple(dpi, shorterSide);
+    int newSize = Math.round(shorterSide * multiple);
     return Bitmap.createScaledBitmap(
       icon,
       newSize,
