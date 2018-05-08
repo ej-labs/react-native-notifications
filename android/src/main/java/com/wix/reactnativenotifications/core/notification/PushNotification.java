@@ -371,8 +371,8 @@ public class PushNotification implements IPushNotification {
             this.isSchedule = isSchedule;
             this.promise = promise;
             String _url = mNotificationProps.getLargeIcon();
-            Log.w(Defs.LOGTAG, "url: " + _url != null ? "null" : _url);
-            this.url = CoreHelper.isValidUrl(_url) ? null : _url;
+            Log.w(Defs.LOGTAG, "url: " + (_url != null ?  _url : "null"));
+            this.url = CoreHelper.isValidUrl(_url) ? _url : null;
         }
       
       
@@ -415,7 +415,7 @@ public class PushNotification implements IPushNotification {
             Notification.Builder notiBuilder = getNotificationBuilder(pendingIntent);
             setNotiSmallIcon(notiBuilder, smallIcon);
             super.onPostExecute(img);
-            Log.w(Defs.LOGTAG, "bitmap" + img == null ? "null" : "ok");
+            Log.w(Defs.LOGTAG, "bitmap" + (img == null ? "null" : "ok"));
             setNotiLargeIcon(notiBuilder, img);
             Notification notification = notiBuilder.build();
 
