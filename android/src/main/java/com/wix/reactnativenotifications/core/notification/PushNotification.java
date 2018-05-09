@@ -101,7 +101,7 @@ public class PushNotification implements IPushNotification {
 
     @Override
     public void onReceived() throws InvalidNotificationException {
-        postNotification(null, false, null); //dont need to received any id;
+        registNotification(mId, null); //dont need to received any id;
         notifyReceivedToJS();
     }
 
@@ -113,17 +113,17 @@ public class PushNotification implements IPushNotification {
 
     @Override
     public int onPostRequest(Integer notificationId, Promise promise) {
-        return postNotification(notificationId, promise);
+        return registNotification(notificationId, promise);
     }
-
-
+    
     /* Async function resolve by react promise register notification and schedule it */
-    protected int postNotification(Integer notificationId, Promise promise) {
+    protected int registNotification(Integer notificationId, Promise promise) {
        AsyncNotificationBuilder noti = new AsyncNotificationBuilder(
         notificationId,
         promise
         );
 
+        // run regist notification
         noti.execute();
         return notificationId;
     }
