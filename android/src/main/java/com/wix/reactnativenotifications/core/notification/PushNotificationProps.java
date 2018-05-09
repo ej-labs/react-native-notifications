@@ -157,6 +157,11 @@ public class PushNotificationProps {
         }
     }
 
+    public boolean isSchedule() {
+        double fireDate = getFireDate();
+        return fireDate != 0l;
+    }
+
     public long getRepeatInterval() {
         String interval =  mBundle.getString("repeatInterval");
         return buildRepeatTimeMilis(interval);

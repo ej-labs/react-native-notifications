@@ -1,12 +1,11 @@
 package com.wix.reactnativenotifications.core.notification;
 
+// import android.annotation.TargetApi;
 import android.app.AlarmManager;
-import android.os.AsyncTask;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
-import android.annotation.TargetApi;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -14,13 +13,13 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.Promise;
-import com.wix.reactnativenotifications.Defs;
+import com.facebook.react.bridge.ReactContext;
 import com.wix.reactnativenotifications.core.AppLaunchHelper;
 import com.wix.reactnativenotifications.core.AppLifecycleFacade;
 import com.wix.reactnativenotifications.core.AppLifecycleFacade.AppVisibilityListener;
@@ -30,18 +29,17 @@ import com.wix.reactnativenotifications.core.JsIOHelper;
 import com.wix.reactnativenotifications.core.NotificationIntentAdapter;
 import com.wix.reactnativenotifications.core.NotificationScheduler;
 import com.wix.reactnativenotifications.core.ProxyService;
+import com.wix.reactnativenotifications.Defs;
 
 import static com.wix.reactnativenotifications.Defs.NOTIFICATION_OPENED_EVENT_NAME;
 import static com.wix.reactnativenotifications.Defs.NOTIFICATION_RECEIVED_EVENT_NAME;
 
-
-
-import java.net.URL;
 import 	java.io.InputStream;
-import java.nio.file.ProviderMismatchException;
+import java.io.IOException; 
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.io.IOException; 
+import java.net.URL;
+import java.nio.file.ProviderMismatchException;
 
 public class PushNotification implements IPushNotification {
 
@@ -51,7 +49,6 @@ public class PushNotification implements IPushNotification {
     final protected JsIOHelper mJsIOHelper;
     final protected PushNotificationProps mNotificationProps;
     protected Integer mId = null;
-    protected PendingIntent shedulePendingIntent = null;
     final protected AppVisibilityListener mAppVisibilityListener = new AppVisibilityListener() {
         @Override
         public void onAppVisible() {
@@ -115,16 +112,15 @@ public class PushNotification implements IPushNotification {
     }
 
     @Override
-    public int onPostRequest(Integer notificationId, boolean isSchedule, Promise promise) {
-        return postNotification(notificationId, isSchedule, promise);
+    public int onPostRequest(Integer notificationId, Promise promise) {
+        return postNotification(notificationId, promise);
     }
 
 
     /* Async function resolve by react promise register notification and schedule it */
-    protected int postNotification(Integer notificationId, boolean isSchedule, Promise promise) {
+    protected int postNotification(Integer notificationId, Promise promise) {
        AsyncNotificationBuilder noti = new AsyncNotificationBuilder(
-        notificationId, 
-        isSchedule,
+        notificationId,
         promise
         );
 
@@ -281,9 +277,7 @@ public class PushNotification implements IPushNotification {
             notificationId, 
             notificationIntent, 
             PendingIntent.FLAG_CANCEL_CURRENT
-            );
-
-        shedulePendingIntent = pendingIntent;
+        );
 
         AlarmManager alarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
 
@@ -311,9 +305,18 @@ public class PushNotification implements IPushNotification {
             notificationManager.cancel(mId);
         }
 
-        if (shedulePendingIntent != null) {
+        if (mNotificationProps.isSchedule() == true) {
+            Intent intent = new Intent(mContext, NotificationScheduler.class);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                mContext, 
+                mId, 
+                intent, 
+                PendingIntent.FLAG_CANCEL_CURRENT
+            );
+
+            // get AlarmManager and cancel intent
             AlarmManager alarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
-            alarmManager.cancel(shedulePendingIntent);
+            alarmManager.cancel(pendingIntent);
         }
     }
 
@@ -388,10 +391,10 @@ public class PushNotification implements IPushNotification {
         private Promise promise;
         private String url;
       
-        public AsyncNotificationBuilder(int id, boolean isSchedule, Promise promise) {
+        public AsyncNotificationBuilder(int id, Promise promise) {
             super();
             this.id = id;
-            this.isSchedule = isSchedule;
+            this.isSchedule = mNotificationProps.isSchedule();
             this.promise = promise;
             String _url = mNotificationProps.getLargeIcon();
             this.url = CoreHelper.isValidUrl(_url) ? _url : null;
