@@ -23,7 +23,7 @@ public class NotificationScheduler extends BroadcastReceiver {
     
     Notification notification = intent.getParcelableExtra(NOTIFICATION);
     int notificationId = intent.getIntExtra(NOTIFICATION_ID, 0);
-    Log.e(Defs.LOGTAG, "NotificationScheduler: scheduler recive nofity call: " +notificationId);
+    Log.i(Defs.LOGTAG, "NotificationScheduler: scheduler receive nofity call with id: " +notificationId);
       notificationManager.notify(notificationId, notification);
   }
 }

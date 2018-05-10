@@ -32,12 +32,12 @@ public class PushNotificationsDrawer implements IPushNotificationsDrawer {
 
     @Override
     public void onAppInit() {
-        onNotificationClearAllRequest();
+        // onNotificationClearAllRequest();
     }
 
     @Override
     public void onAppVisible() {
-        onNotificationClearAllRequest();
+        // onNotificationClearAllRequest();
     }
 
     @Override
@@ -51,7 +51,7 @@ public class PushNotificationsDrawer implements IPushNotificationsDrawer {
 
     @Override
     public void onNotificationOpened() {
-        onNotificationClearAllRequest();
+        // onNotificationClearAllRequest();
     }
 
     @Override

@@ -16,6 +16,7 @@ export class NotificationsAndroid {
     notificationOpenedListener = DeviceEventEmitter.addListener("notificationOpened", (notification) => listener(new NotificationAndroid(notification)));
   }
 
+
   static clearNotificationOpenedListener() {
     if (notificationOpenedListener) {
       notificationOpenedListener.remove();
@@ -59,7 +60,7 @@ export class NotificationsAndroid {
     return id;
   }
 
-  static cancelLocalNotification(id: number) {
+  static cancelLocalNotification(id: Number) {
     RNNotifications.cancelLocalNotification(id);
   }
 

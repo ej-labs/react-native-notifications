@@ -164,7 +164,7 @@ export default class NotificationsIOS {
     NativeRNNotifications.getBadgesCount(callback);
   }
 
-  static setBadgesCount(count: number) {
+  static setBadgesCount(count: Number) {
     NativeRNNotifications.setBadgesCount(count);
   }
 
@@ -180,7 +180,7 @@ export default class NotificationsIOS {
     NativeRNNotifications.consumeBackgroundQueue();
   }
 
-  static log(message: string) {
+  static log(message: String) {
     NativeRNNotifications.log(message);
   }
 
