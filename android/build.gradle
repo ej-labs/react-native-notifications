@@ -34,7 +34,7 @@ android {
 
 dependencies {
     // Google's GCM.
-    provided "com.facebook.react:react-native:${_reactNativeVersion}"
+    compile "com.facebook.react:react-native:${_reactNativeVersion}"
     compile "com.google.firebase:firebase-messaging:10.2.1"
     testCompile 'junit:junit:4.12'
     testCompile 'org.mockito:mockito-core:2.+'
