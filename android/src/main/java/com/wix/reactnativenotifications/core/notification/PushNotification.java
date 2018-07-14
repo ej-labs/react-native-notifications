@@ -413,6 +413,7 @@ public class PushNotification implements IPushNotification {
                 connection.connect();
                 in = connection.getInputStream();
                 Bitmap myBitmap = BitmapFactory.decodeStream(in);
+                if (myBitmap == null) return null;
                 Resources resources = mContext.getResources();
                 int dpi = CoreHelper.getDeivceDPI(resources.getDisplayMetrics());
                 return CoreHelper.makeLargeIcon(myBitmap, dpi);

@@ -61,6 +61,7 @@ public class CoreHelper {
 
   static Bitmap makeLargeIcon(Bitmap image, int dpi){
     Bitmap icon = image;
+    if (icon == null) return null;
     int imageHeight = icon.getHeight(); //get original image height
     int imageWidth = icon.getWidth();
     int shorterSide = imageWidth < imageHeight ? imageWidth : imageHeight;
