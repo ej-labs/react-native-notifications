@@ -48,13 +48,13 @@ public class RNNotificationsModule extends ReactContextBaseJavaModule implements
     public void initialize() {
         final IPushNotificationsDrawer notificationsDrawer = PushNotificationsDrawer.get(getReactApplicationContext().getApplicationContext());
         notificationsDrawer.onAppInit();
-        startTokenRefreshService(FcmInstanceIdRefreshHandlerService.ACTION_APP_LAUNCH);
+        // startTokenRefreshService(FcmInstanceIdRefreshHandlerService.ACTION_APP_LAUNCH);
     }
 
     @ReactMethod
     public void refreshToken() {
         Log.d(LOGTAG, "Native method invocation: refreshToken()");
-        startTokenRefreshService(FcmInstanceIdRefreshHandlerService.ACTION_MANUAL_REFRESH);
+        // startTokenRefreshService(FcmInstanceIdRefreshHandlerService.ACTION_MANUAL_REFRESH);
     }
 
     @ReactMethod
