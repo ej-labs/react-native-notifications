@@ -13,6 +13,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.media.RingtoneManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -411,6 +413,13 @@ public class PushNotification implements IPushNotification {
             String _url = mNotificationProps.getLargeIcon();
             this.url = CoreHelper.isValidUrl(_url) ? _url : null;
         }
+
+        private boolean isNetworkAvailable() {
+            ConnectivityManager connectivityManager 
+                  = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+            return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+        }
       
       
         @Override
@@ -419,6 +428,8 @@ public class PushNotification implements IPushNotification {
             InputStream in;
             HttpURLConnection connection = null;
             try {
+                if (this.isNetworkAvailable() == false) return null;
+
                 URL url = new URL(this.url);
                 connection = (HttpURLConnection) url.openConnection();
                 connection.setDoInput(true);
@@ -426,6 +437,7 @@ public class PushNotification implements IPushNotification {
                 in = connection.getInputStream();
                 Bitmap myBitmap = BitmapFactory.decodeStream(in);
                 if (myBitmap == null) return null;
+
                 Resources resources = mContext.getResources();
                 int dpi = CoreHelper.getDeivceDPI(resources.getDisplayMetrics());
                 return CoreHelper.makeLargeIcon(myBitmap, dpi);
@@ -436,6 +448,7 @@ public class PushNotification implements IPushNotification {
             } finally {
               if(connection != null) connection.disconnect();
             }
+            
             return null;
         }
       
