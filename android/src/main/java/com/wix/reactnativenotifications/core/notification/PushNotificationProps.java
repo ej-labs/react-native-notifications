@@ -150,7 +150,10 @@ public class PushNotificationProps {
     public long getFireDate() {
         try {
             double fireDate =  mBundle.getDouble("fireDate");
-            return Double.valueOf(fireDate).longValue();
+            long fireTime = Double.valueOf(fireDate).longValue();
+            long millis = System.currentTimeMillis() % 1000;
+            fireTime = fireTime - millis;
+            return fireTime > 0l ? fireTime : 0l;
         } catch (NumberFormatException e) {
             Log.e(Defs.LOGTAG, "parse fire date error");
             return 0l;

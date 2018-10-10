@@ -5,7 +5,7 @@ import android.content.Intent;
 import com.google.firebase.iid.FirebaseInstanceIdService;
 
 /**
- * Instance-ID + token refreshing handling service. Contacts the GCM to fetch the updated token.
+ * Instance-ID + token refreshing handling service. Contacts the FCM to fetch the updated token.
  *
  * @author amitd
  */

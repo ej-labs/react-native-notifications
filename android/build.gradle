@@ -5,12 +5,12 @@ def safeExtGet(prop, fallback) {
 }
 
 android {
-    compileSdkVersion safeExtGet('compileSdkVersion', 26)
+    compileSdkVersion safeExtGet('compileSdkVersion', 27)
     buildToolsVersion safeExtGet('buildToolsVersion', "27.0.3")
 
     defaultConfig {
         minSdkVersion safeExtGet('minSdkVersion', 19)
-        targetSdkVersion safeExtGet('targetSdkVersion', 26)
+        targetSdkVersion safeExtGet('targetSdkVersion', 27)
         versionCode 1
         versionName "1.0"
     }
@@ -28,7 +28,7 @@ android {
 }
 
 dependencies {
-    // Google's GCM.
+    // Google's FCM.
     implementation "com.google.firebase:firebase-messaging:10.2.6"
     compileOnly "com.facebook.react:react-native:${safeExtGet('reactNativeVersion', '+')}"
     testImplementation 'junit:junit:4.12'
