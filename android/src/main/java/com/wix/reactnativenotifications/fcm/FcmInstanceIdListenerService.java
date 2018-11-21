@@ -1,8 +1,11 @@
 package com.wix.reactnativenotifications.fcm;
 
 import android.content.Intent;
+import android.util.Log;
 
 import com.google.firebase.iid.FirebaseInstanceIdService;
+
+import com.wix.reactnativenotifications.Defs;
 
 /**
  * Instance-ID + token refreshing handling service. Contacts the FCM to fetch the updated token.
@@ -21,7 +24,11 @@ public class FcmInstanceIdListenerService extends FirebaseInstanceIdService {
     public void onTokenRefresh() {
         // Fetch updated Instance ID token and notify our app's server of any changes (if applicable).
         // Google recommends running this from an intent service.
-        Intent intent = new Intent(this, FcmInstanceIdRefreshHandlerService.class);
-        startService(intent);
+        try {
+            Intent intent = new Intent(this, FcmInstanceIdRefreshHandlerService.class);
+            startService(intent);
+        } catch (Exception e) {
+            Log.e(Defs.LOGTAG, "start fcm services failed" + e.getMessage());
+        }
     }
 }
